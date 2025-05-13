@@ -1,0 +1,61 @@
+import pygame
+
+class Rightsword(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((60,60))
+        self.image.fill((255,0,0))
+        self.rect = self.image.get_rect()
+        self.rect.left = x
+        self.rect.centery = y
+        self.var = 0
+
+    def update(self):
+        self.var += 1
+        if self.var == 10:
+            self.kill()
+
+class Leftsword(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((60,60))
+        self.image.fill((255,0,0))
+        self.rect = self.image.get_rect()
+        self.rect.right = x
+        self.rect.centery = y
+        self.var = 0
+
+    def update(self):
+        self.var += 1
+        if self.var == 10:
+            self.kill()
+
+class Upsword(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((60,60))
+        self.image.fill((255,0,0))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = y
+        self.rect.centerx = x
+        self.var = 0
+
+    def update(self):
+        self.var += 1
+        if self.var == 10:
+            self.kill()
+
+class Downsword(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((60,60))
+        self.image.fill((255,0,0))
+        self.rect = self.image.get_rect()
+        self.rect.top = y
+        self.rect.centerx = x
+        self.var = 0
+
+    def update(self):
+        self.var += 1
+        if self.var == 10:
+            self.kill()
