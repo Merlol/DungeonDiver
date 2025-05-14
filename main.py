@@ -1,6 +1,7 @@
 import pygame
 from player import Player
 from enemy import Enemy
+from wall_tile import Wall
 
 pygame.init()
 
@@ -15,27 +16,42 @@ GREY = (169, 169, 169)
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 PURPLE = (255, 0, 255)
+BLACK = (0,0,0)
+TILE_SIZE = 200
 
 #Sprites
  #Sprite Groups
 all_sprites = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 swords = pygame.sprite.Group()
+walls = pygame.sprite.Group()
 
  #Sprite Generation
-player = Player(40, 40, 7, WIDTH, HEIGHT, all_sprites, swords)
+player = Player(40, 40, 7, WIDTH, HEIGHT, all_sprites, swords, walls)
 all_sprites.add(player)
 
-enemy = Enemy(200, 200, 3, WIDTH, HEIGHT)
-enemies.add(enemy)
-all_sprites.add(enemy)
-
 #Give screen background
-screen.fill(GREY)
+screen.fill(BLACK)
 
-#Create A Level
-def map_create():
-    pass
+#Level Generation
+def load_map(filename):
+    global enemies, walls, all_sprites
+
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+    for row_index, line in enumerate(lines):
+        for col_index, char in enumerate(line.strip('\n')):
+            x = col_index * TILE_SIZE
+            y = row_index * TILE_SIZE
+            if char == 'X':
+                wall = Wall(x, y, TILE_SIZE)
+                walls.add(wall)
+                all_sprites.add(wall)
+            elif char == 'E':
+                enemy = Enemy(x, y, 3, WIDTH, HEIGHT, walls)
+                enemies.add(enemy)
+                all_sprites.add(enemy)
 
 #Game State Functions:
 def game_run_screen():
@@ -48,8 +64,12 @@ def game_run_screen():
             if event.key == pygame.K_ESCAPE:
                 running = False
     # --- Game Logic ---
-    for sword in swords:
-        enemy_hit = pygame.sprite.spritecollide(sword, enemies, True)
+     # Collisions
+    for enemy in enemies:
+        enemy_hit = pygame.sprite.spritecollide(enemy, swords,True)
+        if enemy_hit:
+            enemy.kill()
+
 
     for e in enemies:
         e.setPlayer(player)
@@ -59,7 +79,7 @@ def game_run_screen():
     camera_x = player.rect.centerx - WIDTH // 2
 
     # --- Drawing ---
-    screen.fill(GREY)
+    screen.fill(BLACK)
     for sprite in all_sprites:
         screen.blit(sprite.image, (sprite.rect.x - camera_x, sprite.rect.y - camera_y))
 
@@ -67,6 +87,7 @@ def game_run_screen():
 FPS = 60
 game_state = "RUN"
 running = True
+map_loaded = False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -76,6 +97,9 @@ while running:
                 running = False
 
     if game_state == "RUN":
+        if not map_loaded:
+            load_map("maps/lvl1.txt")
+            map_loaded = True
         game_run_screen()
 
     elif game_state == "PAUSE":

@@ -1,6 +1,6 @@
-XXXXXXXXXX
-X  X EEE X
-X  X     X
-X  XXXX  X
-X        X
-XXXXXXXXXX
+XXXXXXXXX
+X X EE  X
+X X     X
+X XXXX  X
+X       X
+XXXXXXXXX
