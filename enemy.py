@@ -11,7 +11,7 @@ class Enemy(pygame.sprite.Sprite):
         self.width = WIDTH
         self.height = HEIGHT
         self.player = None
-        self.dx = 0
+        self.dx = 4
         self.dy = 0
         self.walls = wall_group
 
@@ -23,33 +23,38 @@ class Enemy(pygame.sprite.Sprite):
         self.check_move(keys)
 
     def check_move(self, keys):
-        self.dx = 0
-        self.dy = 0
 
-        if self.player.rect.x > self.rect.x:
-            self.dx = self.speed
-        if self.player.rect.x < self.rect.x:
-            self.dx = -(self.speed)
-        if self.player.rect.y < self.rect.y:
-            self.dy = -(self.speed)
-        if self.player.rect.y > self.rect.y:
-            self.dy = self.speed
+        if not (self.player == None):
+            if self.player.rect.x > self.rect.x:
+                self.dx = self.speed
+            if self.player.rect.x < self.rect.x:
+                self.dx = -(self.speed)
+            if self.player.rect.y < self.rect.y:
+                self.dy = -(self.speed)
+            if self.player.rect.y > self.rect.y:
+                self.dy = self.speed
 
         self.move()
 
     def move(self):
-        self.rect.x += self.dx
-        for wall in self.walls:
-            if self.rect.colliderect(wall.rect):
-                if self.dx > 0:
-                    self.rect.right = wall.rect.left
-                elif self.dx < 0:
-                    self.rect.left = wall.rect.right
+        if self.player == None:
+            self.rect.x += self.dx
+            print(self.dx)
+            for wall in self.walls:
+                if self.rect.colliderect(wall.rect):
+                    if self.dx > 0:
+                        self.rect.right = wall.rect.left
+                        self.dx = -self.dx
+                    elif self.dx < 0:
+                        self.rect.left = wall.rect.right
+                        self.dx = -self.dx
 
-        self.rect.y += self.dy
-        for wall in self.walls:
-            if self.rect.colliderect(wall.rect):
-                if self.dy > 0:
-                    self.rect.bottom = wall.rect.top
-                elif self.dy < 0:
-                    self.rect.top = wall.rect.bottom
+            self.rect.y += self.dy
+            for wall in self.walls:
+                if self.rect.colliderect(wall.rect):
+                    if self.dy > 0:
+                        self.rect.bottom = wall.rect.top
+                        self.dy = -self.dy
+                    elif self.dy < 0:
+                        self.rect.top = wall.rect.bottom
+                        self.dy = -self.dy

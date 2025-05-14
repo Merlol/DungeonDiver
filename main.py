@@ -71,8 +71,8 @@ def game_run_screen():
             enemy.kill()
 
 
-    for e in enemies:
-        e.setPlayer(player)
+    #for e in enemies:
+     #   e.setPlayer(player)
     all_sprites.update()
 
     camera_y = player.rect.centery - HEIGHT // 2
