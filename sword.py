@@ -1,10 +1,13 @@
 import pygame
 
+BLACK = (0,0,0)
+
 class Rightsword(pygame.sprite.Sprite):
     def __init__(self, x, y, tile_size):
         super().__init__()
         self.image = pygame.Surface((tile_size//4,tile_size//4))
         self.rect = self.image.get_rect()
+        self.image.set_colorkey(BLACK)
         self.rect.left = x
         self.rect.centery = y
         self.var = 0
@@ -19,6 +22,7 @@ class Leftsword(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.Surface((tile_size//4,tile_size//4))
         self.rect = self.image.get_rect()
+        self.image.set_colorkey(BLACK)
         self.rect.right = x
         self.rect.centery = y
         self.var = 0
@@ -33,6 +37,7 @@ class Upsword(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.Surface((tile_size//4,tile_size//4))
         self.rect = self.image.get_rect()
+        self.image.set_colorkey(BLACK)
         self.rect.bottom = y
         self.rect.centerx = x
         self.var = 0
@@ -47,6 +52,7 @@ class Downsword(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.Surface((tile_size//4,tile_size//4))
         self.rect = self.image.get_rect()
+        self.image.set_colorkey(BLACK)
         self.rect.top = y
         self.rect.centerx = x
         self.var = 0

@@ -1,10 +1,21 @@
 import pygame.sprite
+from spritesheet import SpriteSheet
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed, WIDTH, HEIGHT, wall_group, tile_size):
+    def __init__(self, x, y, speed, WIDTH, HEIGHT, wall_group, tile_size, enemy_group):
         super().__init__()
-        self.image = pygame.Surface((tile_size//5, tile_size//5))
-        self.image.fill((0, 255, 255))
+        enemy_image = pygame.image.load('assets/Slime_Green.png').convert_alpha()
+        sprite_sheet = SpriteSheet(enemy_image)
+        BLACK = (0, 0, 0)
+
+        self.frames = []
+        for i in range(8):
+            frame = sprite_sheet.get_image(i, 1, 64, 64, tile_size // 75, BLACK)
+            self.frames.append(frame)
+
+        self.image = frame
+        self.image = pygame.Surface((40, 40))
+        self.image.fill((0, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x,y)
         self.speed = speed
@@ -14,16 +25,21 @@ class Enemy(pygame.sprite.Sprite):
         self.dx = 4
         self.dy = 0
         self.walls = wall_group
+        self.enemies = enemy_group
+        self.knows = False
+
+        self.last_update = pygame.time.get_ticks()
+        self.animation_cooldown = 75
+        self.frame = 0
 
     def setPlayer(self, player):
         self.player = player
 
     def update(self):
-        keys = pygame.key.get_pressed()
-        self.check_move(keys)
+        self.check_move()
+        #self.animation()
 
-    def check_move(self, keys):
-
+    def check_move(self):
         if self.player:
             if self.player.rect.x > self.rect.x:
                 self.dx = self.speed
@@ -36,9 +52,19 @@ class Enemy(pygame.sprite.Sprite):
 
         self.move()
 
+    def animation(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_update >= self.animation_cooldown:
+            self.frame += 1
+            self.last_update = current_time
+            if self.frame >= len(self.frames):
+                self.frame = 0
+        self.image = self.frames[self.frame]
+
     def move(self):
         if self.player == None:
             self.rect.x += self.dx
+            #Check wall collisions
             for wall in self.walls:
                 if self.rect.colliderect(wall.rect):
                     if self.dx > 0:
@@ -48,7 +74,17 @@ class Enemy(pygame.sprite.Sprite):
                         self.rect.left = wall.rect.right
                         self.dx = -self.dx
 
+            for other in self.enemies:
+                if other != self and self.rect.colliderect(other.rect):
+                    if self.dx > 0:
+                        self.rect.right = other.rect.left
+                        self.dx = -self.dx
+                    elif self.dx < 0:
+                        self.rect.left = other.rect.right
+                        self.dx = -self.dx
+
             self.rect.y += self.dy
+            # Check wall collisions
             for wall in self.walls:
                 if self.rect.colliderect(wall.rect):
                     if self.dy > 0:
@@ -56,6 +92,15 @@ class Enemy(pygame.sprite.Sprite):
                         self.dy = -self.dy
                     elif self.dy < 0:
                         self.rect.top = wall.rect.bottom
+                        self.dy = -self.dy
+
+            for other in self.enemies:
+                if other != self and self.rect.colliderect(other.rect):
+                    if self.dy > 0:
+                        self.rect.right = other.rect.left
+                        self.dy = -self.dy
+                    elif self.dy < 0:
+                        self.rect.left = other.rect.right
                         self.dy = -self.dy
 
         else:
@@ -67,6 +112,13 @@ class Enemy(pygame.sprite.Sprite):
                     elif self.dx < 0:
                         self.rect.left = wall.rect.right
 
+            for other in self.enemies:
+                if other != self and self.rect.colliderect(other.rect):
+                    if self.dx > 0:
+                        self.rect.right = other.rect.left
+                    elif self.dx < 0:
+                        self.rect.left = other.rect.right
+
             self.rect.y += self.dy
             for wall in self.walls:
                 if self.rect.colliderect(wall.rect):
@@ -74,3 +126,10 @@ class Enemy(pygame.sprite.Sprite):
                         self.rect.bottom = wall.rect.top
                     elif self.dy < 0:
                         self.rect.top = wall.rect.bottom
+
+            for other in self.enemies:
+                if other != self and self.rect.colliderect(other.rect):
+                    if self.dy > 0:
+                        self.rect.right = other.rect.left
+                    elif self.dy < 0:
+                        self.rect.left = other.rect.right

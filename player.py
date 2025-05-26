@@ -7,9 +7,11 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
 
         #Animation Frames
-        player_image = pygame.image.load('../PygameTester/assets/Player.png').convert_alpha()
+        player_image = pygame.image.load('assets/Player.png').convert_alpha()
         sprite_sheet = SpriteSheet(player_image)
         BLACK = (0, 0, 0)
+        self.upbaseframe = sprite_sheet.get_image(0, 2, 32, 32, tile_size//75, BLACK)
+        self.upbaseframe = sprite_sheet.get_image(0, 2, 32, 32, tile_size // 75, BLACK)
         self.rightframes = []
         for i in range(6):
             frame = sprite_sheet.get_image(i, 1, 32, 32, tile_size//75, BLACK)
@@ -19,6 +21,7 @@ class Player(pygame.sprite.Sprite):
         for i in range(6):
             frame = sprite_sheet.get_image(i, 1, 32, 32, tile_size // 75, BLACK)
             frame = pygame.transform.flip(frame, True, False)
+            frame.set_colorkey((BLACK))
             self.leftframes.append(frame)
 
         self.downframes = []
@@ -40,6 +43,7 @@ class Player(pygame.sprite.Sprite):
         for i in range(4):
             frame = sprite_sheet.get_image(i, 7, 32, 32, tile_size // 75, BLACK)
             frame = pygame.transform.flip(frame, True, False)
+            frame.set_colorkey((BLACK))
             self.leftattackframes.append(frame)
 
         self.downattackframes = []
@@ -52,9 +56,38 @@ class Player(pygame.sprite.Sprite):
             frame = sprite_sheet.get_image(i, 8, 32, 32, tile_size // 75, BLACK)
             self.upattackframes.append(frame)
 
+        self.rightsprintframes = []
+        for i in range(6):
+            frame = sprite_sheet.get_image(i, 4, 32, 32, tile_size // 75, BLACK)
+            self.rightsprintframes.append(frame)
+
+        self.rightsprintframes = []
+        for i in range(6):
+            frame = sprite_sheet.get_image(i, 4, 32, 32, tile_size // 75, BLACK)
+            self.rightsprintframes.append(frame)
+
+        self.leftsprintframes = []
+        for i in range(6):
+            frame = sprite_sheet.get_image(i, 4, 32, 32, tile_size // 75, BLACK)
+            frame = pygame.transform.flip(frame, True, False)
+            frame.set_colorkey((BLACK))
+            self.leftsprintframes.append(frame)
+
+        self.downsprintframes = []
+        for i in range(6):
+            frame = sprite_sheet.get_image(i, 3, 32, 32, tile_size // 75, BLACK)
+            self.downsprintframes.append(frame)
+
+        self.upsprintframes = []
+        for i in range(6):
+            frame = sprite_sheet.get_image(i, 5, 32, 32, tile_size // 75, BLACK)
+            self.upsprintframes.append(frame)
+
         self.image = frame
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.rect.center = (x, y)
+        self.rect.inflate_ip(-16, -16)
+
         self.speed = speed
         self.width = screen_width
         self.height = screen_height
@@ -83,10 +116,10 @@ class Player(pygame.sprite.Sprite):
         #If the player is slashing, they will not move
         if not self.sword_group:
             self.check_move(keys)
-            print("moving")
-            self.animation()
+            self.animation(keys)
+            if self.swordframe != 0:
+                self.sword_animation()
         else:
-            print("sword")
             self.sword_animation()
         self.slash(keys, self.all_sprites_group, self.sword_group)
         self.hurt()
@@ -125,39 +158,73 @@ class Player(pygame.sprite.Sprite):
                 if self.swordframe >= len(self.upattackframes):
                     self.swordframe = 0
             self.image = self.upattackframes[self.swordframe]
-    def animation(self):
+    def animation(self, keys):
         current_time = pygame.time.get_ticks()
-        if self.direction == 'E' or self.direction == 'N':
-            if current_time - self.last_update >= self.animation_cooldown:
-                self.frame += 1
-                self.last_update = current_time
-                if self.frame >= len(self.rightframes):
-                    self.frame = 0
-            self.image = self.rightframes[self.frame]
+        self.swordframe = 0
+        if keys[pygame.K_LSHIFT]:
+            if self.direction == 'E':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.rightsprintframes):
+                        self.frame = 0
+                self.image = self.rightsprintframes[self.frame]
 
-        if self.direction == 'W':
-            if current_time - self.last_update >= self.animation_cooldown:
-                self.frame += 1
-                self.last_update = current_time
-                if self.frame >= len(self.leftframes):
-                    self.frame = 0
-            self.image = self.leftframes[self.frame]
+            if self.direction == 'W':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.leftsprintframes):
+                        self.frame = 0
+                self.image = self.leftsprintframes[self.frame]
 
-        if self.direction == 'S':
-            if current_time - self.last_update >= self.animation_cooldown:
-                self.frame += 1
-                self.last_update = current_time
-                if self.frame >= len(self.downframes):
-                    self.frame = 0
-            self.image = self.downframes[self.frame]
+            if self.direction == 'S':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.downsprintframes):
+                        self.frame = 0
+                self.image = self.downsprintframes[self.frame]
 
-        if self.direction == 'N':
-            if current_time - self.last_update >= self.animation_cooldown:
-                self.frame += 1
-                self.last_update = current_time
-                if self.frame >= len(self.upframes):
-                    self.frame = 0
-            self.image = self.upframes[self.frame]
+            if self.direction == 'N':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.upsprintframes):
+                        self.frame = 0
+                self.image = self.upsprintframes[self.frame]
+        else:
+            if self.direction == 'E':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.rightframes):
+                        self.frame = 0
+                self.image = self.rightframes[self.frame]
+
+            if self.direction == 'W':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.leftframes):
+                        self.frame = 0
+                self.image = self.leftframes[self.frame]
+
+            if self.direction == 'S':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.downframes):
+                        self.frame = 0
+                self.image = self.downframes[self.frame]
+
+            if self.direction == 'N':
+                if current_time - self.last_update >= self.animation_cooldown:
+                    self.frame += 1
+                    self.last_update = current_time
+                    if self.frame >= len(self.upframes):
+                        self.frame = 0
+                self.image = self.upframes[self.frame]
 
     def check_move(self, keys):
         self.dx = 0
@@ -242,3 +309,10 @@ class Player(pygame.sprite.Sprite):
             if self.rect.colliderect(enemy.rect) and self.immunity == 0:
                 self.health -= 1
                 self.immunity = 45
+
+    def draw(self, screen, camera_offset):
+        # Draw image with camera offset
+        screen_pos = (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1])
+
+        # Draw rect outline in red
+        pygame.draw.rect(screen, (255, 0, 0), (*screen_pos, self.rect.width, self.rect.height), 1)

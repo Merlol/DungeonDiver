@@ -2,9 +2,10 @@ import pygame
 from player import Player
 from enemy import Enemy
 from wall_tile import Wall
-from door import Door
 from keys import Keys
 from exit import Exit
+from pygame.math import Vector2
+from floor import Floor
 
 pygame.init()
 
@@ -38,12 +39,32 @@ walls = pygame.sprite.Group()
 doors = pygame.sprite.Group()
 exits = pygame.sprite.Group()
 keys = pygame.sprite.Group()
+targetgroup = pygame.sprite.Group()
 tile_sprites = pygame.sprite.Group()
 
  #Sprite Generation
 
 #Give screen background
 screen.fill(BLACK)
+
+#Line of Sight function
+def has_line_of_sight(enemy, player):
+    global walls
+    start = Vector2(enemy.rect.center)
+    end = Vector2(player.rect.center)
+    direction = (end - start).normalize()
+    distance = start.distance_to(end)
+
+    current_pos = start
+    step = 5
+
+    for i in range(0, int(distance), step):
+        current_pos += direction * step
+        point_rect = pygame.Rect(current_pos.x, current_pos.y, 1, 1)
+        for wall in walls:
+            if wall.rect.colliderect(point_rect):
+                return False
+    return True
 
 #Draw Text function
 def draw_text(text, font, text_col, x, y):
@@ -52,7 +73,7 @@ def draw_text(text, font, text_col, x, y):
 
 #Level Generation
 def load_map(filename):
-    global enemies, walls, all_sprites, keysx, keysy, player
+    global enemies, walls, all_sprites, keysx, keysy, player, exit
 
     with open(filename, 'r') as file:
         lines = file.readlines()
@@ -66,35 +87,42 @@ def load_map(filename):
                 walls.add(wall)
                 tile_sprites.add(wall)
             elif char == 'E':
-                enemy = Enemy(x, y, 3, WIDTH, HEIGHT, walls, TILE_SIZE)
+                floor = Floor(x, y, TILE_SIZE)
+                tile_sprites.add(floor)
+                enemy = Enemy(x + TILE_SIZE//2, y + TILE_SIZE//2, 7, WIDTH, HEIGHT, walls, TILE_SIZE, enemies)
                 enemies.add(enemy)
                 all_sprites.add(enemy)
-            elif char == 'D':
-                door = Door(x, y, TILE_SIZE)
-                doors.add(door)
-                tile_sprites.add(door)
             elif char == 'K':
-                keysx = x
-                keysy = y
+                floor = Floor(x, y, TILE_SIZE)
+                tile_sprites.add(floor)
+                keysx = x + TILE_SIZE // 2
+                keysy = y + TILE_SIZE // 2
             elif char == 'T':
-                exit = Exit(x, y, TILE_SIZE)
+                exit = Exit(x, y, TILE_SIZE, keys)
                 walls.add(exit)
                 tile_sprites.add(exit)
                 exits.add(exit)
             elif char == 'P':
-                player = Player(x, y, TILE_SIZE//5, TILE_SIZE//5, TILE_SIZE//25, WIDTH, HEIGHT, all_sprites, swords, walls, enemies, exits, TILE_SIZE)
+                floor = Floor(x, y, TILE_SIZE)
+                tile_sprites.add(floor)
+                player = Player(x + TILE_SIZE//2, y + TILE_SIZE//2, TILE_SIZE//5, TILE_SIZE//5, TILE_SIZE//25, WIDTH, HEIGHT, all_sprites, swords, walls, enemies, exits, TILE_SIZE)
                 all_sprites.add(player)
+            elif char == ' ':
+                floor = Floor(x, y, TILE_SIZE)
+                tile_sprites.add(floor)
 
 #Game State Functions:
 def game_run_screen():
-    global running, player_info, player, game_state, gotkey, key_made
+    global running, player_info, player, game_state, gotkey, key_made, ui_open, exit
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
+            if event.key == pygame.K_TAB:
+                ui_open = not ui_open
+
     # --- Game Logic ---
      # Collisions
     for enemy in enemies:
@@ -102,12 +130,8 @@ def game_run_screen():
         if enemy_hit:
             enemy.kill()
 
-    door_touch = pygame.sprite.spritecollide(player, doors, False)
-    if door_touch:
-        player_info = True
-
-    if player_info:
-        for e in enemies:
+    for e in enemies:
+        if e.knows:
             e.setPlayer(player)
 
     if player.health == 0:
@@ -122,6 +146,7 @@ def game_run_screen():
     collect = pygame.sprite.spritecollide(player, keys, True)
     if collect:
         gotkey = True
+        exit.open()
         key = Keys(WIDTH - 10, 10)
         keys.add(key)
 
@@ -136,15 +161,31 @@ def game_run_screen():
 
     # --- Drawing ---
     screen.fill(BLACK)
+
     if gotkey:
         for key in keys:
             screen.blit(key.image, (WIDTH - 30,  10))
+
     for sprite in tile_sprites:
         screen.blit(sprite.image, (sprite.rect.x - camera_x, sprite.rect.y - camera_y))
+
+    for enemy in enemies:
+        if has_line_of_sight(enemy, player):
+            enemy.knows = True
+        button = pygame.key.get_pressed()
+        if button[pygame.K_TAB]:
+            start = (enemy.rect.centerx - camera_x, enemy.rect.centery - camera_y)
+            end = (player.rect.centerx - camera_x, player.rect.centery - camera_y)
+            pygame.draw.line(screen, (255, 0, 0), start, end)
+
+            player.draw(screen, (camera_x, camera_y))
+
     for sprite in all_sprites:
         if not sprite == player:
             screen.blit(sprite.image, (sprite.rect.x - camera_x, sprite.rect.y - camera_y))
+
     screen.blit(player.image, (player.rect.x - camera_x, player.rect.y - camera_y))
+
     draw_text(f"Health: {player.health}", font, WHITE, 10, 10)
 
 def game_over():
@@ -183,6 +224,7 @@ keysx = 0
 keysx = 0
 key_made = False
 gotkey = False
+ui_open = False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -193,7 +235,7 @@ while running:
 
     if game_state == "RUN":
         if not map_loaded:
-            load_map("maps/lvl2.txt")
+            load_map("maps/lvl1.txt")
             map_loaded = True
         game_run_screen()
 
