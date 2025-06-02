@@ -8,13 +8,13 @@ class Player(pygame.sprite.Sprite):
 
         #Animation Frames
         player_image = pygame.image.load('assets/Player.png').convert_alpha()
-        sprite_sheet = SpriteSheet(player_image)
+        sprite_sheet = SpriteSheet(player_image, 0, 0)
         BLACK = (0, 0, 0)
         self.upbaseframe = sprite_sheet.get_image(0, 2, 32, 32, tile_size//75, BLACK)
         self.upbaseframe = sprite_sheet.get_image(0, 2, 32, 32, tile_size // 75, BLACK)
         self.rightframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 1, 32, 32, tile_size//75, BLACK)
+            frame = sprite_sheet.get_image(i, 1, 32,32, tile_size//75, BLACK)
             self.rightframes.append(frame)
 
         self.leftframes = []
@@ -86,7 +86,7 @@ class Player(pygame.sprite.Sprite):
         self.image = frame
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.rect.inflate_ip(-16, -16)
+        #self.rect.inflate_ip(-16, -16)
 
         self.speed = speed
         self.width = screen_width
@@ -115,10 +115,11 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         #If the player is slashing, they will not move
         if not self.sword_group:
-            self.check_move(keys)
-            self.animation(keys)
             if self.swordframe != 0:
                 self.sword_animation()
+            else:
+                self.check_move(keys)
+                self.animation(keys)
         else:
             self.sword_animation()
         self.slash(keys, self.all_sprites_group, self.sword_group)
@@ -276,16 +277,6 @@ class Player(pygame.sprite.Sprite):
                     self.rect.bottom = wall.rect.top
                 elif self.dy < 0:
                     self.rect.top = wall.rect.bottom
-
-    def boundary_check(self):
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > self.width:
-            self.rect.right = self.width
-        if self.rect.top < 0:
-            self.rect.top = 0
-        if self.rect.bottom > self.height:
-            self.rect.bottom = self.height
 
     def slash(self, keys, all_sprites_group, sword_group):
         now = pygame.time.get_ticks()

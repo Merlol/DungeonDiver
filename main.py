@@ -6,6 +6,7 @@ from keys import Keys
 from exit import Exit
 from pygame.math import Vector2
 from floor import Floor
+import math
 
 pygame.init()
 
@@ -26,7 +27,8 @@ TILE_SIZE = 150
 
 #Fonts
 font = pygame.font.SysFont('Arial', 24)# None = default
-big_font = pygame.font.SysFont("Arial", 100)
+big_font = pygame.font.Font("assets/fonts/pixelfont.ttf", 100)
+game_font = pygame.font.Font("assets/fonts/pixelfont.ttf", 32)
 
 loss = big_font.render("GAME OVER", True, YELLOW)
 
@@ -46,6 +48,32 @@ tile_sprites = pygame.sprite.Group()
 
 #Give screen background
 screen.fill(BLACK)
+
+#Start Screen
+def start():
+    global running, game_state, titlePos, titlePosMult
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
+
+    button = pygame.key.get_pressed()
+    if button[pygame.K_RETURN]:
+        game_state = "LEVEL1"
+
+    screen.fill(BLACK)
+    if titlePos >= 1:
+        titlePosMult = -1
+    elif titlePos <= -1:
+        titlePosMult = 1
+
+    titlePos += 0.04 * titlePosMult
+
+    screen.blit(title_image, ((WIDTH / 2 - (title_image.get_width() / 2)), 40 * math.sin(titlePos) + (HEIGHT / 15)))
+
+    draw_text("Press Enter to Continue", game_font, WHITE, (WIDTH/3.2), 600)
 
 #Line of Sight function
 def has_line_of_sight(enemy, player):
@@ -113,7 +141,7 @@ def load_map(filename):
 
 #Game State Functions:
 def game_run_screen():
-    global running, player_info, player, game_state, gotkey, key_made, ui_open, exit
+    global running, player, game_state, gotkey, key_made, ui_open, exit, level
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -142,6 +170,7 @@ def game_run_screen():
         all_sprites.add(key)
         keys.add(key)
         key_made = True
+        print("key made")
 
     collect = pygame.sprite.spritecollide(player, keys, True)
     if collect:
@@ -150,11 +179,12 @@ def game_run_screen():
         key = Keys(WIDTH - 10, 10)
         keys.add(key)
 
+
     all_sprites.update()
 
     if gotkey:
         if player.escape:
-            game_state = "WIN"
+            level = True
 
     camera_y = player.rect.centery - HEIGHT // 2
     camera_x = player.rect.centerx - WIDTH // 2
@@ -179,6 +209,7 @@ def game_run_screen():
             pygame.draw.line(screen, (255, 0, 0), start, end)
 
             player.draw(screen, (camera_x, camera_y))
+            enemy.draw(screen, (camera_x, camera_y))
 
     for sprite in all_sprites:
         if not sprite == player:
@@ -198,8 +229,8 @@ def game_over():
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-    screen.fill(BLUE)
-    draw_text("GAME OVER", big_font, YELLOW, WIDTH // 3, 300)
+    screen.fill(BLACK)
+    draw_text("GAME OVER", big_font, WHITE, WIDTH // 3.5, 300)
 
 def win():
     global running
@@ -211,20 +242,26 @@ def win():
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-    screen.fill(BLUE)
-    draw_text("YOU WIN!", big_font, YELLOW, WIDTH // 3, 300)
+    screen.fill(BLACK)
+    draw_text("YOU WON!", big_font, WHITE, WIDTH // 3.5, 300)
 
 # --- Game Loop ---
 FPS = 60
-game_state = "RUN"
+game_state = "START"
 running = True
 map_loaded = False
-player_info = False
-keysx = 0
-keysx = 0
 key_made = False
 gotkey = False
 ui_open = False
+level = False
+
+#Start Screen UI
+title_image = pygame.image.load('assets/title.png').convert_alpha()
+title_image = pygame.transform.scale(title_image, (500, 500))
+title_image.set_colorkey(BLACK)
+titlePos = 1
+titlePosMult = 1
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -233,17 +270,38 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-    if game_state == "RUN":
+    if game_state == "LEVEL1":
         if not map_loaded:
             load_map("maps/lvl1.txt")
             map_loaded = True
         game_run_screen()
+        if level:
+            game_state = "LEVEL2"
+            map_loaded = False
+            key_made = False
+            gotkey = False
+            ui_open = False
+            level = False
+            for sprite in all_sprites:
+                sprite.kill()
+            for tile in tile_sprites:
+                tile.kill()
+            for key in keys:
+                key.kill()
+
+    if game_state == "LEVEL2":
+        if not map_loaded:
+            load_map("maps/lvl2.txt")
+            map_loaded = True
+        game_run_screen()
+        if level:
+            game_state = "WIN"
 
     elif game_state == "PAUSE":
         pass
 
     elif game_state == "START":
-        pass
+        start()
 
     elif game_state == "WIN":
         win()

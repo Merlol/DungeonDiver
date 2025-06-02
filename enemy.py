@@ -5,17 +5,15 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, WIDTH, HEIGHT, wall_group, tile_size, enemy_group):
         super().__init__()
         enemy_image = pygame.image.load('assets/Slime_Green.png').convert_alpha()
-        sprite_sheet = SpriteSheet(enemy_image)
+        sprite_sheet = SpriteSheet(enemy_image, 18, 15)
         BLACK = (0, 0, 0)
 
         self.frames = []
         for i in range(8):
-            frame = sprite_sheet.get_image(i, 1, 64, 64, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 1, 28, 32, tile_size // 75, BLACK)
             self.frames.append(frame)
 
         self.image = frame
-        self.image = pygame.Surface((40, 40))
-        self.image.fill((0, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x,y)
         self.speed = speed
@@ -37,7 +35,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def update(self):
         self.check_move()
-        #self.animation()
+        self.animation()
 
     def check_move(self):
         if self.player:
@@ -133,3 +131,10 @@ class Enemy(pygame.sprite.Sprite):
                         self.rect.right = other.rect.left
                     elif self.dy < 0:
                         self.rect.left = other.rect.right
+
+    def draw(self, screen, camera_offset):
+        # Draw image with camera offset
+        screen_pos = (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1])
+
+        # Draw rect outline in red
+        pygame.draw.rect(screen, (255, 0, 0), (*screen_pos, self.rect.width, self.rect.height), 1)
