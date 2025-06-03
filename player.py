@@ -125,7 +125,6 @@ class Player(pygame.sprite.Sprite):
         self.slash(keys, self.all_sprites_group, self.sword_group)
         self.hurt()
 
-
     def sword_animation(self):
         current_time = pygame.time.get_ticks()
         if self.direction == 'E' or self.direction == 'N':

@@ -117,6 +117,7 @@ class Enemy(pygame.sprite.Sprite):
                     elif self.dx < 0:
                         self.rect.left = other.rect.right
 
+
             self.rect.y += self.dy
             for wall in self.walls:
                 if self.rect.colliderect(wall.rect):
