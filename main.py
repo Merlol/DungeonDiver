@@ -178,7 +178,6 @@ def game_run_screen():
         all_sprites.add(key)
         keys.add(key)
         key_made = True
-        print("key made")
 
     #Make the key appear at the top right if the player collects it and open the exit door (Just the image changes)
     collect = pygame.sprite.spritecollide(player, keys, True)
@@ -244,11 +243,13 @@ FPS = 60
 game_state = "START"
 current_state = "START"
 running = True
+controls_open = True
 map_loaded = False
 key_made = False
 gotkey = False
 ui_open = False
 level = False
+last_level = None
 
 #Start Screen UI
 title_image = pygame.image.load('assets/title.png').convert_alpha()
@@ -270,12 +271,34 @@ while running:
                 else:
                     current_state = game_state
                     game_state = "PAUSE"
+
             if event.key == pygame.K_TAB:
                 ui_open = not ui_open
+
+            if event.key == pygame.K_c:
+                controls_open = not controls_open
+
+            if event.key == pygame.K_r:
+                map_loaded = False
+                key_made = False
+                gotkey = False
+                ui_open = False
+                level = False
+
+                for sprite in all_sprites:
+                    sprite.kill()
+                for tile in tile_sprites:
+                    tile.kill()
+                for key in keys:
+                    key.kill()
+
+                if last_level:
+                    game_state = last_level
 
     if game_state == "LEVEL1":
         if not map_loaded:
             load_map("maps/lvl1.txt")
+            last_level = game_state
             map_loaded = True
         game_run_screen()
         if level:
@@ -295,6 +318,7 @@ while running:
     if game_state == "LEVEL2":
         if not map_loaded:
             load_map("maps/lvl2.txt")
+            last_level = game_state
             map_loaded = True
         game_run_screen()
         if level:
@@ -311,6 +335,9 @@ while running:
 
     elif game_state == "DEAD":
         game_over()
+
+    if controls_open:
+        screen.blit()
 
     pygame.display.update()
     clock.tick(FPS)
