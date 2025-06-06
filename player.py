@@ -88,6 +88,13 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         #self.rect.inflate_ip(-16, -16)
 
+        #Sounds
+        pygame.mixer.init()
+
+        self.slash_sound = pygame.mixer.Sound("assets/sounds/slash.mp3")
+        self.step = pygame.mixer.Sound("assets/sounds/footstep.mp3")
+
+
         self.speed = speed
         self.width = screen_width
         self.height = screen_height
@@ -113,6 +120,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         keys = pygame.key.get_pressed()
+        self.sound(keys)
         #If the player is slashing, they will not move
         if not self.sword_group:
             if self.swordframe != 0:
@@ -280,6 +288,7 @@ class Player(pygame.sprite.Sprite):
     def slash(self, keys, all_sprites_group, sword_group):
         now = pygame.time.get_ticks()
         if keys[pygame.K_SPACE] and now-self.last_slash > self.slash_cooldown:
+            self.slash_sound.play()
             if self.direction == "E":
                 sword = Rightsword(self.rect.centerx, self.rect.centery, self.tile_size)
             if self.direction == "W":
@@ -299,6 +308,17 @@ class Player(pygame.sprite.Sprite):
             if self.rect.colliderect(enemy.rect) and self.immunity == 0:
                 self.health -= 1
                 self.immunity = 45
+
+    def sound(self, keys):
+        if keys[pygame.K_LSHIFT]:
+            if self.frame == 0 or self.frame == 3:
+                self.step.stop()
+                self.step.play()
+        else:
+            if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]:
+                if self.frame == 0:
+                    self.step.stop()
+                    self.step.play()
 
     def draw(self, screen, camera_offset):
         # Draw image with camera offset

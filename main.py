@@ -9,6 +9,9 @@ from floor import Floor
 import math
 
 pygame.init()
+pygame.mixer.init()
+keySound = pygame.mixer.Sound("assets/sounds/keypick.mp3")
+slimeSound = pygame.mixer.Sound("assets/sounds/slimedies.mp3")
 
 #Set up display
 WIDTH, HEIGHT = 1500, 750
@@ -164,6 +167,7 @@ def game_run_screen():
     for enemy in enemies:
         enemy_hit = pygame.sprite.spritecollide(enemy, swords,False)
         if enemy_hit:
+            slimeSound.play()
             enemy.kill()
 
     for e in enemies:
@@ -182,6 +186,7 @@ def game_run_screen():
     #Make the key appear at the top right if the player collects it and open the exit door (Just the image changes)
     collect = pygame.sprite.spritecollide(player, keys, True)
     if collect:
+        keySound.play()
         gotkey = True
         exit.open()
         key = Keys(WIDTH - 10, 10)
@@ -215,8 +220,10 @@ def game_run_screen():
             end = (player.rect.centerx - camera_x, player.rect.centery - camera_y)
             pygame.draw.line(screen, (255, 0, 0), start, end)
 
-            player.draw(screen, (camera_x, camera_y))
             enemy.draw(screen, (camera_x, camera_y))
+
+    if ui_open:
+        player.draw(screen, (camera_x, camera_y))
 
     for sprite in all_sprites:
         if not sprite == player:
@@ -257,6 +264,10 @@ title_image = pygame.transform.scale(title_image, (500, 500))
 title_image.set_colorkey(BLACK)
 titlePos = 1
 titlePosMult = 1
+
+pygame.mixer.music.load("assets/sounds/music.mp3")
+pygame.mixer.music.set_volume(0.25)
+pygame.mixer.music.play(-1)
 
 while running:
     for event in pygame.event.get():
@@ -300,7 +311,9 @@ while running:
             load_map("maps/lvl1.txt")
             last_level = game_state
             map_loaded = True
+
         game_run_screen()
+
         if level:
             game_state = "LEVEL2"
             map_loaded = False
@@ -320,7 +333,9 @@ while running:
             load_map("maps/lvl2.txt")
             last_level = game_state
             map_loaded = True
+
         game_run_screen()
+
         if level:
             game_state = "WIN"
 
@@ -337,7 +352,8 @@ while running:
         game_over()
 
     if controls_open:
-        screen.blit()
+        controls = pygame.image.load("assets/controls.png").convert_alpha()
+        screen.blit(controls, (20, 20))
 
     pygame.display.update()
     clock.tick(FPS)

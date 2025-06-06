@@ -4,6 +4,11 @@ from spritesheet import SpriteSheet
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, WIDTH, HEIGHT, wall_group, tile_size, enemy_group):
         super().__init__()
+        pygame.mixer.init()
+        self.hitSound = pygame.mixer.Sound("assets/sounds/slimedies.mp3")
+        self.moveSound = pygame.mixer.Sound("assets/sounds/slimejump.mp3")
+        self.moveSound.set_volume(0.5)
+
         enemy_image = pygame.image.load('assets/Slime_Green.png').convert_alpha()
         sprite_sheet = SpriteSheet(enemy_image, 18, 15)
         BLACK = (0, 0, 0)
@@ -29,6 +34,8 @@ class Enemy(pygame.sprite.Sprite):
         self.last_update = pygame.time.get_ticks()
         self.animation_cooldown = 75
         self.frame = 0
+
+        self.sound_cooldown = 0
 
     def setPlayer(self, player):
         self.player = player
@@ -57,6 +64,12 @@ class Enemy(pygame.sprite.Sprite):
             self.last_update = current_time
             if self.frame >= len(self.frames):
                 self.frame = 0
+            if self.frame == 0:
+                if self.sound_cooldown == 2:
+                    self.moveSound.play()
+                    self.sound_cooldown = 0
+                else:
+                    self.sound_cooldown += 1
         self.image = self.frames[self.frame]
 
     def move(self):
