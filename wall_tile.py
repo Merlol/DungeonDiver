@@ -1,5 +1,6 @@
 import pygame
 
+#I use this for collisions with the enemies and the player
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, tile_size):
         super().__init__()

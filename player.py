@@ -3,15 +3,13 @@ from sword import *
 from spritesheet import SpriteSheet
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, speed, screen_width, screen_height, all_sprites, swords, wall_group, enemies, exits, tile_size):
+    def __init__(self, x, y, speed, screen_width, screen_height, all_sprites, swords, wall_group, enemies, exits, tile_size):
         super().__init__()
 
         #Animation Frames
         player_image = pygame.image.load('assets/Player.png').convert_alpha()
         sprite_sheet = SpriteSheet(player_image, 0, 0)
         BLACK = (0, 0, 0)
-        self.upbaseframe = sprite_sheet.get_image(0, 2, 32, 32, tile_size//75, BLACK)
-        self.upbaseframe = sprite_sheet.get_image(0, 2, 32, 32, tile_size // 75, BLACK)
         self.rightframes = []
         for i in range(6):
             frame = sprite_sheet.get_image(i, 1, 32,32, tile_size//75, BLACK)
@@ -86,7 +84,6 @@ class Player(pygame.sprite.Sprite):
         self.image = frame
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        #self.rect.inflate_ip(-16, -16)
 
         #Sounds
         pygame.mixer.init()
@@ -134,6 +131,7 @@ class Player(pygame.sprite.Sprite):
         self.hurt()
 
     def sword_animation(self):
+        #Changes the direction the player slashes (visually) depending on where they are facing
         current_time = pygame.time.get_ticks()
         if self.direction == 'E' or self.direction == 'N':
             if current_time - self.last_update >= self.animation_cooldown:
@@ -166,6 +164,7 @@ class Player(pygame.sprite.Sprite):
                 if self.swordframe >= len(self.upattackframes):
                     self.swordframe = 0
             self.image = self.upattackframes[self.swordframe]
+
     def animation(self, keys):
         current_time = pygame.time.get_ticks()
         self.swordframe = 0
@@ -259,6 +258,7 @@ class Player(pygame.sprite.Sprite):
     def move(self):
         self.escape = False
 
+
         self.rect.x += self.dx
 
         for exit in self.exits:
@@ -289,6 +289,7 @@ class Player(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
         if keys[pygame.K_SPACE] and now-self.last_slash > self.slash_cooldown:
             self.slash_sound.play()
+            #Slash in different directions depending on where the player is facing
             if self.direction == "E":
                 sword = Rightsword(self.rect.centerx, self.rect.centery, self.tile_size)
             if self.direction == "W":
@@ -310,17 +311,19 @@ class Player(pygame.sprite.Sprite):
                 self.immunity = 45
 
     def sound(self, keys):
+        #Plays a footstep every 3 frames if sprinting
         if keys[pygame.K_LSHIFT]:
             if self.frame == 0 or self.frame == 3:
                 self.step.stop()
                 self.step.play()
+        #Plays a footstep every 0 frame if walking normally
         else:
             if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]:
                 if self.frame == 0:
                     self.step.stop()
                     self.step.play()
 
-    def draw(self, screen, camera_offset):
+    def rectOutline(self, screen, camera_offset):
         # Draw image with camera offset
         screen_pos = (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1])
 

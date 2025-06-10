@@ -1,5 +1,6 @@
 import pygame
 
+#Class to displlay the keys on the level once all enemies have died
 class Keys(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()

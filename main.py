@@ -150,7 +150,7 @@ def load_map(filename):
             elif char == 'P':
                 floor = Floor(x, y, TILE_SIZE)
                 tile_sprites.add(floor)
-                player = Player(x + TILE_SIZE//2, y + TILE_SIZE//2, TILE_SIZE//5, TILE_SIZE//5, TILE_SIZE//25, WIDTH, HEIGHT, all_sprites, swords, walls, enemies, exits, TILE_SIZE)
+                player = Player(x + TILE_SIZE//2, y + TILE_SIZE//2, TILE_SIZE//25, WIDTH, HEIGHT, all_sprites, swords, walls, enemies, exits, TILE_SIZE)
                 all_sprites.add(player)
 
             #Creates flooring (Only graphical)
@@ -164,20 +164,25 @@ def game_run_screen():
 
     # --- Game Logic ---
      # Collisions
+    camera_y = player.rect.centery - HEIGHT // 2
+    camera_x = player.rect.centerx - WIDTH // 2
+
     for enemy in enemies:
         enemy_hit = pygame.sprite.spritecollide(enemy, swords,False)
         if enemy_hit:
             slimeSound.play()
             enemy.kill()
-
-    for e in enemies:
-        if e.knows:
-            e.setPlayer(player)
+        if enemy.knows:
+            enemy.setPlayer(player)
+        if has_line_of_sight(enemy, player):
+            enemy.knows = True
 
     if player.health == 0:
         game_state = "DEAD"
 
+    #If all the enemies are dead, make one key (only one)
     if not enemies and not keys and not key_made:
+        #Spawn the key at the coordinates defined in the load_map function (keysx, keysy)
         key = Keys(keysx, keysy)
         all_sprites.add(key)
         keys.add(key)
@@ -189,18 +194,16 @@ def game_run_screen():
         keySound.play()
         gotkey = True
         exit.open()
+
+        #Show the key at the top right (to indicate the player collected it)
         key = Keys(WIDTH - 10, 10)
         keys.add(key)
-
 
     all_sprites.update()
 
     if gotkey:
         if player.escape:
             level = True
-
-    camera_y = player.rect.centery - HEIGHT // 2
-    camera_x = player.rect.centerx - WIDTH // 2
 
     # --- Drawing ---
     screen.fill(BLACK)
@@ -212,18 +215,14 @@ def game_run_screen():
     for sprite in tile_sprites:
         screen.blit(sprite.image, (sprite.rect.x - camera_x, sprite.rect.y - camera_y))
 
-    for enemy in enemies:
-        if has_line_of_sight(enemy, player):
-            enemy.knows = True
-        if ui_open:
+    if ui_open:
+        for enemy in enemies:
             start = (enemy.rect.centerx - camera_x, enemy.rect.centery - camera_y)
             end = (player.rect.centerx - camera_x, player.rect.centery - camera_y)
             pygame.draw.line(screen, (255, 0, 0), start, end)
 
-            enemy.draw(screen, (camera_x, camera_y))
-
-    if ui_open:
-        player.draw(screen, (camera_x, camera_y))
+            enemy.rectOutline(screen, (camera_x, camera_y))
+        player.rectOutline(screen, (camera_x, camera_y))
 
     for sprite in all_sprites:
         if not sprite == player:
@@ -270,7 +269,9 @@ pygame.mixer.music.set_volume(0.25)
 pygame.mixer.music.play(-1)
 
 while running:
+    #Event Handling
     for event in pygame.event.get():
+        #Pausing and Quitting
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
@@ -283,12 +284,15 @@ while running:
                     current_state = game_state
                     game_state = "PAUSE"
 
+            #UI manager for debugging (check LOS and enemy tracking)
             if event.key == pygame.K_TAB:
                 ui_open = not ui_open
 
+            #Opening the controls menu
             if event.key == pygame.K_c:
                 controls_open = not controls_open
 
+            #Restarting the level
             if event.key == pygame.K_r:
                 map_loaded = False
                 key_made = False
@@ -306,21 +310,26 @@ while running:
                 if last_level:
                     game_state = last_level
 
+    #Each individual Level
     if game_state == "LEVEL1":
         if not map_loaded:
             load_map("maps/lvl1.txt")
             last_level = game_state
             map_loaded = True
-
         game_run_screen()
 
+        #Level is true when the player wins
         if level:
+
+            #Reset Global Variables & Change Game State
             game_state = "LEVEL2"
             map_loaded = False
             key_made = False
             gotkey = False
             ui_open = False
             level = False
+
+            #Kill all sprites and create blank world
             for sprite in all_sprites:
                 sprite.kill()
             for tile in tile_sprites:
@@ -337,6 +346,29 @@ while running:
         game_run_screen()
 
         if level:
+            game_state = "LEVEL3"
+            map_loaded = False
+            key_made = False
+            gotkey = False
+            ui_open = False
+            level = False
+            for sprite in all_sprites:
+                sprite.kill()
+            for tile in tile_sprites:
+                tile.kill()
+            for key in keys:
+                key.kill()
+
+    if game_state == "LEVEL3":
+        if not map_loaded:
+            load_map("maps/lvl3.txt")
+            last_level = game_state
+            map_loaded = True
+
+        game_run_screen()
+
+        if level:
+            #Change the game state to win this time
             game_state = "WIN"
 
     elif game_state == "PAUSE":

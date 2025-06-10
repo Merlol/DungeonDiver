@@ -4,11 +4,15 @@ from spritesheet import SpriteSheet
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, WIDTH, HEIGHT, wall_group, tile_size, enemy_group):
         super().__init__()
+
+        #Sounds
         pygame.mixer.init()
         self.hitSound = pygame.mixer.Sound("assets/sounds/slimedies.mp3")
         self.moveSound = pygame.mixer.Sound("assets/sounds/slimejump.mp3")
         self.moveSound.set_volume(0.5)
+        self.sound_cooldown = 0
 
+        #Animation
         enemy_image = pygame.image.load('assets/Slime_Green.png').convert_alpha()
         sprite_sheet = SpriteSheet(enemy_image, 18, 15)
         BLACK = (0, 0, 0)
@@ -19,6 +23,11 @@ class Enemy(pygame.sprite.Sprite):
             self.frames.append(frame)
 
         self.image = frame
+        self.last_update = pygame.time.get_ticks()
+        self.animation_cooldown = 75
+        self.frame = 0
+
+        #Game Logic
         self.rect = self.image.get_rect()
         self.rect.topleft = (x,y)
         self.speed = speed
@@ -27,15 +36,11 @@ class Enemy(pygame.sprite.Sprite):
         self.player = None
         self.dx = 4
         self.dy = 0
+         #These values are used for collisions later
         self.walls = wall_group
         self.enemies = enemy_group
+
         self.knows = False
-
-        self.last_update = pygame.time.get_ticks()
-        self.animation_cooldown = 75
-        self.frame = 0
-
-        self.sound_cooldown = 0
 
     def setPlayer(self, player):
         self.player = player
@@ -59,6 +64,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def animation(self):
         current_time = pygame.time.get_ticks()
+        #Update the frame of the sprite each time the animation cooldown ends
         if current_time - self.last_update >= self.animation_cooldown:
             self.frame += 1
             self.last_update = current_time
@@ -146,7 +152,7 @@ class Enemy(pygame.sprite.Sprite):
                     elif self.dy < 0:
                         self.rect.left = other.rect.right
 
-    def draw(self, screen, camera_offset):
+    def rectOutline(self, screen, camera_offset):
         # Draw image with camera offset
         screen_pos = (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1])
 

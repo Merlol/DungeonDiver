@@ -1,5 +1,6 @@
 import pygame
 
+#This is just graphical. There isn't even any collision
 class Floor(pygame.sprite.Sprite):
     def __init__(self, x, y, tile_size):
         super().__init__()
