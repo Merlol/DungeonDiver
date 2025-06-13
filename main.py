@@ -224,6 +224,12 @@ def game_run_screen():
             enemy.rectOutline(screen, (camera_x, camera_y))
         player.rectOutline(screen, (camera_x, camera_y))
 
+        for sword in swords:
+            screen_pos = (sword.rect.x - camera_x, sword.rect.y - camera_y)
+
+            # Draw rect outline in red
+            pygame.draw.rect(screen, (255, 0, 0), (*screen_pos, sword.rect.width, sword.rect.height), 1)
+
     for sprite in all_sprites:
         if not sprite == player:
             screen.blit(sprite.image, (sprite.rect.x - camera_x, sprite.rect.y - camera_y))
@@ -294,6 +300,7 @@ while running:
 
             #Restarting the level
             if event.key == pygame.K_r:
+
                 map_loaded = False
                 key_made = False
                 gotkey = False
@@ -307,7 +314,9 @@ while running:
                 for key in keys:
                     key.kill()
 
-                if last_level:
+                if game_state == "WIN":
+                    game_state = "START"
+                elif last_level:
                     game_state = last_level
 
     #Each individual Level
