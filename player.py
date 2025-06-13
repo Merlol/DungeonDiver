@@ -9,76 +9,77 @@ class Player(pygame.sprite.Sprite):
         #Animation Frames
         player_image = pygame.image.load('assets/Player.png').convert_alpha()
         sprite_sheet = SpriteSheet(player_image, 0, 0)
-        BLACK = (0, 0, 0)
+        colorkey = (0, 0, 0)
+        scale = tile_size // 75
         self.rightframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 1, 32,32, tile_size//75, BLACK)
+            frame = sprite_sheet.get_image(i, 1, 32,32, scale, colorkey)
             self.rightframes.append(frame)
 
         self.leftframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 1, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 1, 32, 32, scale, colorkey)
             frame = pygame.transform.flip(frame, True, False)
-            frame.set_colorkey((BLACK))
+            frame.set_colorkey((colorkey))
             self.leftframes.append(frame)
 
         self.downframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 0, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 0, 32, 32, scale, colorkey)
             self.downframes.append(frame)
 
         self.upframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 2, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 2, 32, 32, scale, colorkey)
             self.upframes.append(frame)
 
         self.rightattackframes = []
         for i in range(4):
-            frame = sprite_sheet.get_image(i, 7, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 7, 32, 32, scale, colorkey)
             self.rightattackframes.append(frame)
 
         self.leftattackframes = []
         for i in range(4):
-            frame = sprite_sheet.get_image(i, 7, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 7, 32, 32, scale, colorkey)
             frame = pygame.transform.flip(frame, True, False)
-            frame.set_colorkey((BLACK))
+            frame.set_colorkey((colorkey))
             self.leftattackframes.append(frame)
 
         self.downattackframes = []
         for i in range(4):
-            frame = sprite_sheet.get_image(i, 6, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 6, 32, 32, scale, colorkey)
             self.downattackframes.append(frame)
 
         self.upattackframes = []
         for i in range(4):
-            frame = sprite_sheet.get_image(i, 8, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 8, 32, 32, scale, colorkey)
             self.upattackframes.append(frame)
 
         self.rightsprintframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 4, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 4, 32, 32, scale, colorkey)
             self.rightsprintframes.append(frame)
 
         self.rightsprintframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 4, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 4, 32, 32, scale, colorkey)
             self.rightsprintframes.append(frame)
 
         self.leftsprintframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 4, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 4, 32, 32, scale, colorkey)
             frame = pygame.transform.flip(frame, True, False)
-            frame.set_colorkey((BLACK))
+            frame.set_colorkey((colorkey))
             self.leftsprintframes.append(frame)
 
         self.downsprintframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 3, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 3, 32, 32, scale, colorkey)
             self.downsprintframes.append(frame)
 
         self.upsprintframes = []
         for i in range(6):
-            frame = sprite_sheet.get_image(i, 5, 32, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 5, 32, 32, scale, colorkey)
             self.upsprintframes.append(frame)
 
         self.image = frame

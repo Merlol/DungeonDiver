@@ -15,11 +15,10 @@ class Enemy(pygame.sprite.Sprite):
         #Animation
         enemy_image = pygame.image.load('assets/Slime_Green.png').convert_alpha()
         sprite_sheet = SpriteSheet(enemy_image, 18, 15)
-        BLACK = (0, 0, 0)
 
         self.frames = []
         for i in range(8):
-            frame = sprite_sheet.get_image(i, 1, 28, 32, tile_size // 75, BLACK)
+            frame = sprite_sheet.get_image(i, 1, 28, 32, tile_size // 75, (0, 0, 0))
             self.frames.append(frame)
 
         self.image = frame

@@ -158,6 +158,23 @@ def load_map(filename):
                 floor = Floor(x, y, TILE_SIZE)
                 tile_sprites.add(floor)
 
+def reset():
+    global map_loaded, key_made, gotkey, ui_open, level, all_sprites, tile_sprites, keys
+    #Reset all global variables
+    map_loaded = False
+    key_made = False
+    gotkey = False
+    ui_open = False
+    level = False
+
+    # Kill all sprites and create blank world
+    for sprite in all_sprites:
+        sprite.kill()
+    for tile in tile_sprites:
+        tile.kill()
+    for key in keys:
+        key.kill()
+
 #Game State Functions:
 def game_run_screen():
     global running, player, game_state, gotkey, key_made, ui_open, exit, level, current_state
@@ -300,19 +317,7 @@ while running:
 
             #Restarting the level
             if event.key == pygame.K_r:
-
-                map_loaded = False
-                key_made = False
-                gotkey = False
-                ui_open = False
-                level = False
-
-                for sprite in all_sprites:
-                    sprite.kill()
-                for tile in tile_sprites:
-                    tile.kill()
-                for key in keys:
-                    key.kill()
+                reset()
 
                 if game_state == "WIN":
                     game_state = "START"
@@ -329,22 +334,9 @@ while running:
 
         #Level is true when the player wins
         if level:
-
-            #Reset Global Variables & Change Game State
+            #Reset & Change Game State
             game_state = "LEVEL2"
-            map_loaded = False
-            key_made = False
-            gotkey = False
-            ui_open = False
-            level = False
-
-            #Kill all sprites and create blank world
-            for sprite in all_sprites:
-                sprite.kill()
-            for tile in tile_sprites:
-                tile.kill()
-            for key in keys:
-                key.kill()
+            reset()
 
     if game_state == "LEVEL2":
         if not map_loaded:
@@ -356,17 +348,7 @@ while running:
 
         if level:
             game_state = "LEVEL3"
-            map_loaded = False
-            key_made = False
-            gotkey = False
-            ui_open = False
-            level = False
-            for sprite in all_sprites:
-                sprite.kill()
-            for tile in tile_sprites:
-                tile.kill()
-            for key in keys:
-                key.kill()
+            reset()
 
     if game_state == "LEVEL3":
         if not map_loaded:
@@ -375,7 +357,6 @@ while running:
             map_loaded = True
 
         game_run_screen()
-
         if level:
             #Change the game state to win this time
             game_state = "WIN"
